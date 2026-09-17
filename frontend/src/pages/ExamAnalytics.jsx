@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BarChart3, Users, Award, TrendingUp, AlertTriangle, CheckCircle2, HelpCircle } from 'lucide-react';
 
-export default function ExamAnalytics({ exams, selectedExamId, setSelectedExamId }) {
-  const currentExam = exams.find(e => e.id === Number(selectedExamId)) || exams[0];
+export default function ExamAnalytics({ exams = [], selectedExamId, setSelectedExamId }) {
+  const safeExams = Array.isArray(exams) ? exams : [];
+  const currentExam = safeExams.find(e => e.id === Number(selectedExamId)) || safeExams[0];
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +45,7 @@ export default function ExamAnalytics({ exams, selectedExamId, setSelectedExamId
             onChange={(e) => setSelectedExamId(Number(e.target.value))}
             className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {exams.map((e) => (
+            {safeExams.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.name}
               </option>
@@ -142,7 +143,7 @@ export default function ExamAnalytics({ exams, selectedExamId, setSelectedExamId
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {analytics.question_difficulty.map((q) => (
+                  {(analytics.question_difficulty || []).map((q) => (
                     <tr key={q.question_number} className="hover:bg-slate-50/70">
                       <td className="py-3 px-6 font-bold text-slate-800 font-mono">
                         Q{q.question_number < 10 ? `0${q.question_number}` : q.question_number}

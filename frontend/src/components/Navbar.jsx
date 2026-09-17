@@ -13,7 +13,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, selectedExam, exams, backendOnline }) {
+export default function Navbar({ activeTab, setActiveTab, selectedExam, exams = [], backendOnline }) {
+  const safeExams = Array.isArray(exams) ? exams : [];
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'scan', label: 'Scan OMR', icon: ScanLine },

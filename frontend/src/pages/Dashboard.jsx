@@ -14,10 +14,11 @@ import {
   Layers
 } from 'lucide-react';
 
-export default function Dashboard({ exams, setActiveTab, setSelectedExamId, submissions = [] }) {
+export default function Dashboard({ exams = [], setActiveTab, setSelectedExamId, submissions = [] }) {
+  const safeExams = Array.isArray(exams) ? exams : [];
   // Compute aggregate statistics
-  const totalExams = exams.length;
-  const totalSheetsScanned = exams.reduce((acc, e) => acc + (e.submissions_count || 0), 0);
+  const totalExams = safeExams.length;
+  const totalSheetsScanned = safeExams.reduce((acc, e) => acc + (e?.submissions_count || 0), 0);
   const avgAccuracy = "99.4%"; // Measured detection precision on test datasets
 
   return (
@@ -132,7 +133,7 @@ export default function Dashboard({ exams, setActiveTab, setSelectedExamId, subm
           </button>
         </div>
 
-        {exams.length === 0 ? (
+        {safeExams.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
             <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
             <p className="font-semibold text-slate-600">No exams created yet</p>
@@ -152,7 +153,7 @@ export default function Dashboard({ exams, setActiveTab, setSelectedExamId, subm
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                {exams.map((exam) => (
+                {safeExams.map((exam) => (
                   <tr key={exam.id} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6 font-bold text-slate-900">
                       {exam.name}

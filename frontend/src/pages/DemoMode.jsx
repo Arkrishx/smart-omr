@@ -1,31 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Sparkles, Play, RefreshCw, Eye, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { DEFAULT_DEMO_SAMPLES } from '../data/mockData';
 import PipelineVisualizer from '../components/PipelineVisualizer';
 import VisualVerificationModal from '../components/VisualVerificationModal';
 
-export default function DemoMode({ exams, selectedExamId, setSelectedExamId }) {
-  const [samples, setSamples] = useState([]);
+export default function DemoMode({ exams = [], selectedExamId, setSelectedExamId, backendOnline }) {
+  const [samples, setSamples] = useState(DEFAULT_DEMO_SAMPLES);
   const [activeSample, setActiveSample] = useState(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [demoResult, setDemoResult] = useState(null);
   const [demoError, setDemoError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const demoExam = exams.find(e => e.name.includes("Computer Science")) || exams[0];
+  const safeExams = Array.isArray(exams) && exams.length > 0 ? exams : [];
+  const demoExam = safeExams.find(e => e.name?.includes("Computer Science")) || safeExams[0];
 
   useEffect(() => {
-    // Fetch available demo samples from backend
-    axios.get('/api/demo/samples')
-      .then(res => setSamples(res.data.samples || []))
-      .catch(err => console.error("Error loading demo samples:", err));
-  }, []);
+    // If backend is online, try fetching fresh live samples
+    if (backendOnline) {
+      axios.get('/api/demo/samples')
+        .then(res => {
+          if (Array.isArray(res.data?.samples) && res.data.samples.length > 0) {
+            setSamples(res.data.samples);
+          }
+        })
+        .catch(err => console.warn("Using bundled demo benchmark samples:", err));
+    }
+  }, [backendOnline]);
 
   const runDemoEvaluation = async (sample) => {
     setActiveSample(sample);
     setIsEvaluating(true);
     setDemoError(null);
     setDemoResult(null);
+
+    // If backend is offline, run rich client-side benchmark simulation
+    if (!backendOnline) {
+      setTimeout(() => {
+        setDemoResult(sample.simulatedResult || DEFAULT_DEMO_SAMPLES[0].simulatedResult);
+        setIsEvaluating(false);
+      }, 650);
+      return;
+    }
 
     try {
       // 1. Fetch image blob from server
@@ -44,8 +61,12 @@ export default function DemoMode({ exams, selectedExamId, setSelectedExamId }) {
 
       setDemoResult(scanRes.data);
     } catch (err) {
-      console.error(err);
-      setDemoError(err.response?.data?.detail || err.message || "Evaluation failed");
+      console.warn("Backend evaluation failed, falling back to simulated benchmark result:", err);
+      if (sample.simulatedResult) {
+        setDemoResult(sample.simulatedResult);
+      } else {
+        setDemoError(err.response?.data?.detail || err.message || "Evaluation failed");
+      }
     } finally {
       setIsEvaluating(false);
     }

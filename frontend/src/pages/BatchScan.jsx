@@ -21,7 +21,8 @@ export default function BatchScan({ exams, selectedExamId, setSelectedExamId }) 
   const [batchError, setBatchError] = useState(null);
   const [activeModalItem, setActiveModalItem] = useState(null);
 
-  const currentExam = exams.find(e => e.id === Number(selectedExamId)) || exams[0];
+  const safeExams = Array.isArray(exams) ? exams : [];
+  const currentExam = safeExams.find(e => e.id === Number(selectedExamId)) || safeExams[0];
 
   const handleFiles = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -112,7 +113,7 @@ export default function BatchScan({ exams, selectedExamId, setSelectedExamId }) 
             }}
             className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {exams.map((e) => (
+            {safeExams.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.name} ({e.question_count} Qs)
               </option>

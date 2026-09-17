@@ -17,7 +17,7 @@ import CameraScanner from '../components/CameraScanner';
 import PipelineVisualizer from '../components/PipelineVisualizer';
 import VisualVerificationModal from '../components/VisualVerificationModal';
 
-export default function ScanOMR({ exams, selectedExamId, setSelectedExamId, setActiveTab }) {
+export default function ScanOMR({ exams = [], selectedExamId, setSelectedExamId, setActiveTab }) {
   const [activeMode, setActiveMode] = useState('upload'); // 'upload' or 'camera'
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -30,7 +30,8 @@ export default function ScanOMR({ exams, selectedExamId, setSelectedExamId, setA
   const fileInputRef = useRef(null);
 
   // Active exam object
-  const currentExam = exams.find(e => e.id === Number(selectedExamId)) || exams[0];
+  const safeExams = Array.isArray(exams) ? exams : [];
+  const currentExam = safeExams.find(e => e.id === Number(selectedExamId)) || safeExams[0];
 
   const handleFileSelect = (file) => {
     if (!file) return;
@@ -120,7 +121,7 @@ export default function ScanOMR({ exams, selectedExamId, setSelectedExamId, setA
             }}
             className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {exams.map((e) => (
+            {safeExams.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.name} ({e.question_count} Qs &bull; +{e.marks_per_question}/-{e.negative_marks})
               </option>
