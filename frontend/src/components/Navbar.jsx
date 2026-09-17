@@ -13,7 +13,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, selectedExam, exams = [], backendOnline }) {
+export default function Navbar({ activeTab, setActiveTab, selectedExam, exams = [], backendOnline, onOpenSettings }) {
   const safeExams = Array.isArray(exams) ? exams : [];
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -75,10 +75,14 @@ export default function Navbar({ activeTab, setActiveTab, selectedExam, exams = 
 
           {/* Status & Active Exam */}
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-1.5 text-xs font-medium px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50">
+            <button
+              onClick={onOpenSettings}
+              title="Click to configure API connection"
+              className="flex items-center space-x-1.5 text-xs font-medium px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 transition shadow-sm cursor-pointer"
+            >
               <span className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-              <span className="text-slate-600 hidden sm:inline">{backendOnline ? 'CV Engine Ready' : 'Backend Offline'}</span>
-            </div>
+              <span className="text-slate-700 font-semibold">{backendOnline ? 'CV Engine Ready' : 'Backend Offline'}</span>
+            </button>
           </div>
         </div>
 

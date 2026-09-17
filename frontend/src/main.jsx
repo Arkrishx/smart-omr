@@ -5,10 +5,16 @@ import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './index.css'
 
-// Support Vercel / Cloud deployment backend URL
-if (import.meta.env.VITE_API_URL) {
-  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+// Support custom backend URL, environment variable, or live tunnel fallback
+const savedBackendUrl = localStorage.getItem('SMART_OMR_BACKEND_URL');
+const defaultBackendUrl = savedBackendUrl || import.meta.env.VITE_API_URL || 'https://nine-cups-hug.loca.lt';
+
+if (defaultBackendUrl) {
+  axios.defaults.baseURL = defaultBackendUrl;
 }
+
+// Bypass tunnel reminder screen for localtunnel / reverse proxies
+axios.defaults.headers.common['Bypass-Tunnel-Reminder'] = 'true';
 
 // Global Axios Response Interceptor:
 // If an API request returns HTML (which happens when Vercel rewrites /api/* to /index.html in SPA mode),

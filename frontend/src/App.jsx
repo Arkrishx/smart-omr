@@ -10,7 +10,8 @@ import AnswerKeyEditor from './pages/AnswerKeyEditor';
 import ExamAnalytics from './pages/ExamAnalytics';
 import DemoMode from './pages/DemoMode';
 import PrintTemplates from './pages/PrintTemplates';
-import { CloudOff, Sparkles } from 'lucide-react';
+import BackendSettingsModal from './components/BackendSettingsModal';
+import { CloudOff, Sparkles, Settings2, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -18,6 +19,10 @@ export default function App() {
   const [selectedExamId, setSelectedExamId] = useState(DEFAULT_EXAMS[0].id);
   const [backendOnline, setBackendOnline] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [backendUrl, setBackendUrl] = useState(
+    localStorage.getItem('SMART_OMR_BACKEND_URL') || import.meta.env.VITE_API_URL || 'https://nine-cups-hug.loca.lt'
+  );
 
   // Fetch all exams from backend
   const refreshExams = async () => {
@@ -47,6 +52,15 @@ export default function App() {
     refreshExams();
   }, []);
 
+  const handleUrlUpdated = (newUrl, newExams) => {
+    setBackendUrl(newUrl);
+    setExams(newExams);
+    if (newExams.length > 0) {
+      setSelectedExamId(newExams[0].id);
+    }
+    setBackendOnline(true);
+  };
+
   const handleExamCreated = (newExam) => {
     setExams(prev => [newExam, ...(Array.isArray(prev) ? prev : [])]);
     setSelectedExamId(newExam.id);
@@ -65,26 +79,48 @@ export default function App() {
         selectedExam={currentSelectedExam}
         exams={safeExams}
         backendOnline={backendOnline}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {/* Cloud Offline / Demo Mode Notice Banner */}
-      {!backendOnline && (
-        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 text-white text-xs px-4 py-2.5 shadow-sm">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div className="flex items-center space-x-2">
-              <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-extrabold text-[10px] tracking-wider uppercase">
-                Frontend Live
-              </span>
-              <span className="font-medium text-slate-200">
-                Running in interactive demo mode with pre-seeded exams & benchmarks.
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 text-[11px] text-blue-200">
-              <span>To connect OpenCV Python container: configure <code className="bg-blue-900/60 px-1.5 py-0.5 rounded border border-blue-400/30 text-white font-mono">VITE_API_URL</code></span>
-            </div>
+      {/* Backend Status Notification Strip */}
+      <div className={`text-xs px-4 py-2 transition-colors ${
+        backendOnline 
+          ? 'bg-slate-900 text-slate-300 border-b border-slate-800' 
+          : 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-sm'
+      }`}>
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center space-x-2">
+            <span className={`px-2 py-0.5 rounded-md font-extrabold text-[10px] tracking-wider uppercase ${
+              backendOnline ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-400 text-slate-950'
+            }`}>
+              {backendOnline ? 'CV Engine Live' : 'Demo Mode'}
+            </span>
+            <span className="font-medium text-slate-200">
+              {backendOnline 
+                ? `Connected to OpenCV Backend: ${backendUrl}`
+                : 'Using pre-seeded demo exams & simulation.'}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-sm transition"
+            >
+              <Settings2 className="w-3.5 h-3.5" />
+              <span>{backendOnline ? 'Change API URL' : 'Connect Backend'}</span>
+            </button>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Backend Configuration Modal */}
+      <BackendSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentUrl={backendUrl}
+        onUrlUpdated={handleUrlUpdated}
+        backendOnline={backendOnline}
+      />
 
       {/* Main Page Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
