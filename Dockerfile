@@ -16,7 +16,7 @@ RUN npm run build
 # ==========================================
 # Stage 2: Python Backend Runtime
 # ==========================================
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Install system dependencies required for OpenCV
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -29,7 +29,8 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt httpx
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy Backend Source Code
 COPY backend/ ./backend/
