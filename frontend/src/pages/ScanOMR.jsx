@@ -11,7 +11,8 @@ import {
   FileText, 
   Sparkles,
   Award,
-  AlertTriangle
+  AlertTriangle,
+  ScanLine
 } from 'lucide-react';
 import CameraScanner from '../components/CameraScanner';
 import PipelineVisualizer from '../components/PipelineVisualizer';
