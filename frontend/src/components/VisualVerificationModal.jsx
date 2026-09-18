@@ -1,12 +1,48 @@
-import React, { useState } from 'react';
-import { X, ZoomIn, ZoomOut, Download, CheckCircle, AlertCircle, HelpCircle, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { X, ZoomIn, ZoomOut, Download, CheckCircle, AlertCircle, HelpCircle, Eye, RefreshCw, ExternalLink } from 'lucide-react';
 
-export default function VisualVerificationModal({ imageUrl, warpedUrl, isOpen, onClose, score, percentage, candidateId }) {
-  if (!isOpen || !imageUrl) return null;
+export default function VisualVerificationModal({ imageUrl, warpedUrl, fallbackUrl, isOpen, onClose, score, percentage, candidateId }) {
+  if (!isOpen || (!imageUrl && !fallbackUrl)) return null;
 
-  const [activeTab, setActiveTab] = useState('annotated'); // 'annotated' or 'warped'
+  const [activeTab, setActiveTab] = useState('annotated'); // 'annotated', 'warped', or 'original'
+  const [imgLoading, setImgLoading] = useState(true);
+  const [imgError, setImgError] = useState(false);
 
-  const displayUrl = activeTab === 'annotated' ? imageUrl : (warpedUrl || imageUrl);
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
+      return url;
+    }
+    // If it starts with /uploads, resolve against the connected backend API URL
+    if (url.startsWith('/uploads')) {
+      let backendBase = (
+        axios.defaults.baseURL || 
+        localStorage.getItem('SMART_OMR_BACKEND_URL') || 
+        import.meta.env.VITE_API_URL || 
+        ''
+      ).trim().replace(/\/+$/, '');
+      if (backendBase && !/^https?:\/\//i.test(backendBase)) {
+        backendBase = `https://${backendBase}`;
+      }
+      return backendBase ? `${backendBase}${url}` : url;
+    }
+    return url;
+  };
+
+  const getRawUrl = () => {
+    if (activeTab === 'original' && fallbackUrl) return fallbackUrl;
+    if (activeTab === 'warped' && warpedUrl) return warpedUrl;
+    return imageUrl || fallbackUrl;
+  };
+
+  const rawUrl = getRawUrl();
+  const displayUrl = resolveUrl(rawUrl);
+
+  useEffect(() => {
+    setImgLoading(true);
+    setImgError(false);
+  }, [displayUrl, activeTab]);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
@@ -29,7 +65,9 @@ export default function VisualVerificationModal({ imageUrl, warpedUrl, isOpen, o
 
           <div className="flex items-center space-x-2">
             <a
-              href={imageUrl}
+              href={displayUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               download="omr_verified.jpg"
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
             >
@@ -66,6 +104,16 @@ export default function VisualVerificationModal({ imageUrl, warpedUrl, isOpen, o
                 Rectified Top-Down
               </button>
             )}
+            {fallbackUrl && (
+              <button
+                onClick={() => setActiveTab('original')}
+                className={`px-3 py-1 rounded-md font-bold transition ${
+                  activeTab === 'original' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Original Scan
+              </button>
+            )}
           </div>
 
           {/* Color Legend */}
@@ -90,12 +138,59 @@ export default function VisualVerificationModal({ imageUrl, warpedUrl, isOpen, o
         </div>
 
         {/* Image Display Area */}
-        <div className="flex-1 overflow-auto p-4 bg-slate-950 flex items-center justify-center min-h-[450px]">
-          <img
-            src={displayUrl}
-            alt="OMR Verification View"
-            className="max-h-[75vh] w-auto object-contain rounded shadow-lg border border-slate-800"
-          />
+        <div className="relative flex-1 overflow-auto p-4 bg-slate-950 flex items-center justify-center min-h-[450px]">
+          {imgLoading && !imgError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 space-y-2">
+              <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+              <p className="text-xs">Loading verified overlay image...</p>
+            </div>
+          )}
+
+          {imgError ? (
+            <div className="text-center p-8 max-w-md space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Image Preview Notice</p>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  The evaluated image was stored on your cloud container. You can open the raw image directly or view your uploaded copy.
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-3">
+                {fallbackUrl && activeTab !== 'original' && (
+                  <button
+                    onClick={() => setActiveTab('original')}
+                    className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700"
+                  >
+                    <span>View Original Upload</span>
+                  </button>
+                )}
+                <a
+                  href={displayUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Open Raw Image</span>
+                </a>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={displayUrl}
+              alt="OMR Verification View"
+              onLoad={() => setImgLoading(false)}
+              onError={() => {
+                setImgLoading(false);
+                setImgError(true);
+              }}
+              className={`max-h-[75vh] w-auto object-contain rounded shadow-lg border border-slate-800 transition-opacity duration-200 ${
+                imgLoading ? 'opacity-0' : 'opacity-100'
+              }`}
+            />
+          )}
         </div>
 
         {/* Footer Note */}

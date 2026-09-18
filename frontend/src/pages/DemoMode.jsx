@@ -190,8 +190,9 @@ export default function DemoMode({ exams = [], selectedExamId, setSelectedExamId
         <VisualVerificationModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          imageUrl={demoResult.annotated_image_url}
-          warpedUrl={demoResult.warped_image_url}
+          imageUrl={demoResult.annotated_image_url || activeSample?.url}
+          warpedUrl={demoResult.warped_image_url || activeSample?.url}
+          fallbackUrl={activeSample?.url}
           score={demoResult.score}
           percentage={demoResult.percentage}
           candidateId={demoResult.student_id}

@@ -71,6 +71,8 @@ export const DEFAULT_DEMO_SAMPLES = [
         resolution: "1500x2000",
         message: "Optimal image quality detected."
       },
+      annotated_image_url: "/sample_data/demo_1_perfect.jpg",
+      warped_image_url: "/sample_data/demo_1_perfect.jpg",
       pipeline_steps: [
         { name: "Image Preprocessing & Quality Check", duration_ms: 38, status: "SUCCESS" },
         { name: "Canny Edge & Quadrilateral Detection", duration_ms: 72, status: "SUCCESS" },
@@ -112,6 +114,8 @@ export const DEFAULT_DEMO_SAMPLES = [
         resolution: "1500x2000",
         message: "Perspective homography successfully rectified 14.8° skew."
       },
+      annotated_image_url: "/sample_data/demo_2_tilted.jpg",
+      warped_image_url: "/sample_data/demo_2_tilted.jpg",
       pipeline_steps: [
         { name: "Image Preprocessing & Quality Check", duration_ms: 42, status: "SUCCESS" },
         { name: "Canny Edge & Quadrilateral Detection", duration_ms: 85, status: "SUCCESS" },
@@ -153,6 +157,8 @@ export const DEFAULT_DEMO_SAMPLES = [
         resolution: "1500x2000",
         message: "CLAHE illumination normalization corrected shadow gradient."
       },
+      annotated_image_url: "/sample_data/demo_3_uneven_light.jpg",
+      warped_image_url: "/sample_data/demo_3_uneven_light.jpg",
       pipeline_steps: [
         { name: "Image Preprocessing & Quality Check", duration_ms: 52, status: "SUCCESS" },
         { name: "Canny Edge & Quadrilateral Detection", duration_ms: 78, status: "SUCCESS" },
@@ -194,6 +200,8 @@ export const DEFAULT_DEMO_SAMPLES = [
         resolution: "1500x2000",
         message: "Adaptive fill threshold identified light graphite marks."
       },
+      annotated_image_url: "/sample_data/demo_4_faint_pencil.jpg",
+      warped_image_url: "/sample_data/demo_4_faint_pencil.jpg",
       pipeline_steps: [
         { name: "Image Preprocessing & Quality Check", duration_ms: 40, status: "SUCCESS" },
         { name: "Canny Edge & Quadrilateral Detection", duration_ms: 71, status: "SUCCESS" },
@@ -235,6 +243,8 @@ export const DEFAULT_DEMO_SAMPLES = [
         resolution: "1500x2000",
         message: "Integrity check: Flagged multi-mark anomaly on Q10."
       },
+      annotated_image_url: "/sample_data/demo_5_ambiguous.jpg",
+      warped_image_url: "/sample_data/demo_5_ambiguous.jpg",
       pipeline_steps: [
         { name: "Image Preprocessing & Quality Check", duration_ms: 39, status: "SUCCESS" },
         { name: "Canny Edge & Quadrilateral Detection", duration_ms: 74, status: "SUCCESS" },

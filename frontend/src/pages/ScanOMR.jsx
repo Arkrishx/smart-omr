@@ -421,6 +421,7 @@ export default function ScanOMR({ exams = [], selectedExamId, setSelectedExamId,
           onClose={() => setIsModalOpen(false)}
           imageUrl={scanResult.annotated_image_url}
           warpedUrl={scanResult.warped_image_url}
+          fallbackUrl={filePreview}
           score={scanResult.score}
           percentage={scanResult.percentage}
           candidateId={scanResult.student_id}

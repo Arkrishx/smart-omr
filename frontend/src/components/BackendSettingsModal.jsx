@@ -16,6 +16,10 @@ export default function BackendSettingsModal({ isOpen, onClose, currentUrl, onUr
       return;
     }
 
+    if (!/^https?:\/\//i.test(target)) {
+      target = `https://${target}`;
+    }
+
     setTesting(true);
     setTestResult(null);
 
