@@ -16,6 +16,8 @@ dist/
 # Uploads & Temp
 uploads/*
 !uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 *.log
 
 # OS
