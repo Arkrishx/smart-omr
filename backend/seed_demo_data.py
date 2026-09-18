@@ -12,6 +12,8 @@ SAMPLE_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 
 os.makedirs(SAMPLE_DATA_DIR, exist_ok=True)
 
 def seed_demo():
+    # Ensure all tables exist
+    Base.metadata.create_all(bind=engine)
     db: Session = SessionLocal()
     try:
         # Check if demo exam already exists
